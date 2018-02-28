@@ -1,7 +1,11 @@
 {
     "name": "uncss",
     "displayName": "UnCSS",
+<<<<<<< HEAD
     "description": "HIghlights and removes unused CSS rules",
+=======
+    "description": "Highlights and removes unused css",
+>>>>>>> b8923cb1c4dc950472b514d6c2240af990e03697
     "version": "0.0.1",
     "publisher": "Safiyya",
     "engines": {
@@ -11,6 +15,7 @@
         "Other"
     ],
     "activationEvents": [
+<<<<<<< HEAD
         "*"
     ],
     "main": "./extension",
@@ -30,10 +35,28 @@
     "scripts": {
         "postinstall": "node ./node_modules/vscode/bin/install",
         "test": "node ./node_modules/vscode/bin/test"
+=======
+        "onCommand:extension.sayHello"
+    ],
+    "main": "./out/extension",
+    "contributes": {
+        "commands": [{
+            "command": "extension.sayHello",
+            "title": "Hello World"
+        }]
+    },
+    "scripts": {
+        "vscode:prepublish": "npm run compile",
+        "compile": "tsc -p ./",
+        "watch": "tsc -watch -p ./",
+        "postinstall": "node ./node_modules/vscode/bin/install",
+        "test": "npm run compile && node ./node_modules/vscode/bin/test"
+>>>>>>> b8923cb1c4dc950472b514d6c2240af990e03697
     },
     "devDependencies": {
         "typescript": "^2.6.1",
         "vscode": "^1.1.6",
+<<<<<<< HEAD
         "eslint": "^4.11.0",
         "@types/node": "^7.0.43",
         "@types/mocha": "^2.2.42"
@@ -43,3 +66,10 @@
         "purify-css": "^1.2.5"
     }
 }
+=======
+        "tslint": "^5.8.0",
+        "@types/node": "^7.0.43",
+        "@types/mocha": "^2.2.42"
+    }
+}
+>>>>>>> b8923cb1c4dc950472b514d6c2240af990e03697
