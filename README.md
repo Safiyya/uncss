@@ -1,5 +1,7 @@
 # uncss README
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/Safiyya/uncss.svg)](https://greenkeeper.io/)
+
 This is the README for your extension "uncss". After writing up a brief description, we recommend including the following sections.
 
 ## Features
