@@ -45,75 +45,50 @@ function activate(context) {
         watcher = vscode.workspace.createFileSystemWatcher('{**/app/**/*.css,**/app/**/*.html,**/app/**/*.ts}');
 
         watcher.onDidChange(uri => {
+
+            var activeEditor = vscode.window.activeTextEditor;
+
+            if (activeEditor.document.languageId !== "css") return;
+
             var currentFile = vscode.workspace.asRelativePath(uri.path);
             let currentFolder = path.dirname(uri.path);
             let fileNameWithoutExtension = getFileNameWithoutExtension(currentFile);
             vscode.workspace.findFiles(`${fileNameWithoutExtension}.*`, EXCLUSION, LIMIT)
                 .then(uris => {
-                let content = uris.filter(uri => [".html", ".ts", ".js"].includes(path.extname(uri.path)))
-                let style = uris.filter(uri => [".css", ".scss", ".sass"].includes(path.extname(uri.path)))
-                return { content: content.map(u => u.path), css: style.map(u => u.path) }
-
+                    let content = uris.filter(uri => [".html", ".ts", ".js"].includes(path.extname(uri.path)))
+                    let style = uris.filter(uri => [".css", ".scss", ".sass"].includes(path.extname(uri.path)))
+                    return { content: content.map(u => u.path), css: style.map(u => u.path) }
                 })
                 .then(({ content, css }) => {
                     let validRules = purifycss(content, css)
                     return cssParser.parse(validRules).stylesheet.rules;
                 })
                 .then(validRules => {
-                    if (vscode.window.activeTextEditor.document.languageId === "css") {
-                        let css = vscode.window.activeTextEditor.document.getText();
-                        let allRules = cssParser.parse(css).stylesheet.rules;
+                    let cssContent = vscode.window.activeTextEditor.document.getText();
+                    let allRules = cssParser.parse(cssContent).stylesheet.rules;
+                    return parser.getDifference(allRules, validRules);
+                })
+                .then(rules => {
+                    let decorations = vscode.window.createTextEditorDecorationType({
+                        isWholeLine: true,
+                        light: {
+                            textDecoration: "line-through"
+                        },
+                        dark: {
+                            textDecoration: "line-through"
+                        }
+                    })
 
-                        return   parser.getDifference(allRules, validRules);
-                    }
+                    let ranges = rules
+                                    .map(r => {
+                                        return { startLine: r.position.start.line,endLine: r.position.end.line }
+                                    })
+                                    .map(pos => new vscode.Range(pos.startLine-1, 0, pos.endLine-1, 0))
+
+                    activeEditor.setDecorations(decorations, ranges);
                 })
         })
     }
-
-    function extractCssRules(str) {
-        console.log(str)
-    }
-    // function updateDecorations() {
-
-    //     if (!activeEditor || !activeEditor.document) {
-    //         return;
-    //     }
-
-    //     var text = activeEditor.document.getText();
-    //     var mathes = {}, match;
-    //     while (match = pattern.exec(text)) {
-    //         var startPos = activeEditor.document.positionAt(match.index);
-    //         var endPos = activeEditor.document.positionAt(match.index + match[0].length);
-    //         var decoration = {
-    //             range: new vscode.Range(startPos, endPos)
-    //         };
-
-    //         var matchedValue = match[0];
-    //         if (!isCaseSensitive) {
-    //             matchedValue = matchedValue.toUpperCase();
-    //         }
-
-    //         if (mathes[matchedValue]) {
-    //             mathes[matchedValue].push(decoration);
-    //         } else {
-    //             mathes[matchedValue] = [decoration];
-    //         }
-
-    //         if (keywordsPattern.trim() && !decorationTypes[matchedValue]) {
-    //             decorationTypes[matchedValue] = window.createTextEditorDecorationType(styleForRegExp);
-    //         }
-    //     }
-
-    //     Object.keys(decorationTypes).forEach((v) => {
-    //         if (!isCaseSensitive) {
-    //             v = v.toUpperCase();
-    //         }
-    //         var rangeOption = settings.get('isEnable') && mathes[v] ? mathes[v] : [];
-    //         var decorationType = decorationTypes[v];
-    //         activeEditor.setDecorations(decorationType, rangeOption);
-    //     })
-    // }
-
     context.subscriptions.push(disposable);
 }
 exports.activate = activate;
