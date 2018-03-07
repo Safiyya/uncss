@@ -5,6 +5,7 @@ const purifycss = require("purify-css");
 const cssParser = require('css')
 const path = require("path");
 const parser = require("./parser")
+const _ = require("lodash")
 
 let watcher;
 
@@ -47,27 +48,29 @@ function activate(context) {
             var currentFile = vscode.workspace.asRelativePath(uri.path);
             let currentFolder = path.dirname(uri.path);
             let fileNameWithoutExtension = getFileNameWithoutExtension(currentFile);
-            vscode.workspace.findFiles(`${fileNameWithoutExtension}.*`, EXCLUSION, LIMIT).then(uris => {
+            vscode.workspace.findFiles(`${fileNameWithoutExtension}.*`, EXCLUSION, LIMIT)
+                .then(uris => {
                 let content = uris.filter(uri => [".html", ".ts", ".js"].includes(path.extname(uri.path)))
                 let style = uris.filter(uri => [".css", ".scss", ".sass"].includes(path.extname(uri.path)))
                 return { content: content.map(u => u.path), css: style.map(u => u.path) }
 
-            })
-                .then(({ content, css }) => {
-                    let rejected = purifycss(content, css, { rejected: true });
-                    return parser.getCss(rejected);
                 })
-                .then(rejectedCssRules =>{
-                    if(vscode.window.activeTextEditor.document.languageId === "css"){
+                .then(({ content, css }) => {
+                    let validRules = purifycss(content, css)
+                    return cssParser.parse(validRules).stylesheet.rules;
+                })
+                .then(validRules => {
+                    if (vscode.window.activeTextEditor.document.languageId === "css") {
                         let css = vscode.window.activeTextEditor.document.getText();
-                        let parsed = cssParser.parse(css);
-                        console.log(parsed, rejectedCssRules)
+                        let allRules = cssParser.parse(css).stylesheet.rules;
+
+                        return   parser.getDifference(allRules, validRules);
                     }
                 })
         })
     }
-    
-    function extractCssRules(str){
+
+    function extractCssRules(str) {
         console.log(str)
     }
     // function updateDecorations() {

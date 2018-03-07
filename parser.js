@@ -1,17 +1,4 @@
-
-
-let input = `
-________________________________________________
-|
-|   PurifyCSS - Rejected selectors:  
-|   .useless1
-|	.useless2
-|	.useless3
-|
-________________________________________________
-
-SOME USELESS INFO HERE
-`;
+const _ = require("lodash")
 
 function getCssRules(str){
     if(!str || str===undefined) return []
@@ -27,5 +14,11 @@ function getCssRules(str){
    return result
 }
 
+function getDifference(allRules, validRules){
+    let comparer = (value, other) => { return value.selectors[0]=== other.selectors[0]}
+    return _.differenceWith(allRules, validRules, comparer)            
+}
+
 
 exports.getCss = getCssRules;
+exports.getDifference = getDifference;

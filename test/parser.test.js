@@ -27,9 +27,27 @@ suite("Purify CSS parser tests", function () {
             SOME USELESS INFO HERE
             `;
             let actual = target.getCss(input)
-            let expected = [".useless1",".useless2",".useless3"];
+            let expected = [".useless1", ".useless2", ".useless3"];
             assert.deepEqual(actual, expected);
         });
+    })
+
+    suite("Comparison", () => {
+        test("should return correct difference", () => {
+            let all = [
+                { type: "rule", selectors: ["one"], position: {} },
+                { type: "rule", selectors: ["two"], position: {} },
+                { type: "rule", selectors: ["three"], position: {} }
+            ]
+
+            let valid = [
+                { type: "rule", selectors: ["one"], position: {} },
+                { type: "rule", selectors: ["three"], position: {} }];
+
+            let actual = target.getDifference(all, valid);
+            let expected = [{ type: "rule", selectors: ["two"], position: {} }]
+            assert.deepEqual(actual, expected)
+        })
     })
 
 });
